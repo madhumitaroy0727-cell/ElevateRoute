@@ -356,6 +356,9 @@ const ProfileSetup = () => {
                 <h2 className="text-xl font-bold">Building your roadmap...</h2>
                 <p className="text-sm text-muted-foreground mt-2">Our AI is analyzing your profile and creating a personalized career plan.</p>
               </div>
+              <div className="max-w-xs mx-auto rounded-xl bg-muted/50 p-4 transition-all duration-500">
+                <p className="text-xs text-muted-foreground leading-relaxed">{careerTips[currentTip]}</p>
+              </div>
             </>
           ) : (
             <>
