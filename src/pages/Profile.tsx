@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Save } from "lucide-react";
+import { LogOut, Save, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
@@ -91,6 +91,34 @@ const Profile = () => {
             </Button>
           </CardContent>
         </Card>
+
+        <Button
+          variant="outline"
+          className="w-full rounded-xl"
+          onClick={async () => {
+            toast.info("Regenerating roadmap...");
+            const { data: session } = await supabase.auth.getSession();
+            const res = await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-roadmap`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session?.session?.access_token}`,
+                },
+                body: JSON.stringify({}),
+              }
+            );
+            if (res.ok) {
+              const result = await res.json();
+              toast.success(`Roadmap updated with ${result.milestone_count} milestones!`);
+            } else {
+              toast.error("Regeneration failed. Try again later.");
+            }
+          }}
+        >
+          <RefreshCw className="h-4 w-4" /> Regenerate Roadmap
+        </Button>
 
         <Button variant="outline" className="w-full rounded-xl text-destructive hover:text-destructive" onClick={handleSignOut}>
           <LogOut className="h-4 w-4" /> Sign Out
