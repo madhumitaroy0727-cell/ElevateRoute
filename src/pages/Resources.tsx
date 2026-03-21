@@ -220,7 +220,7 @@ const Resources = () => {
                           )}
                           {r.rating && (
                             <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <Star className="h-3 w-3 fill-current text-accent" />
                               {r.rating}
                             </span>
                           )}
