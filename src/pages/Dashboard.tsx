@@ -164,24 +164,23 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-2 rounded-2xl bg-card p-4 shadow-sm active:scale-[0.97] transition-transform"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <User className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-xs font-medium">Update Profile</span>
-          </button>
-          <button
-            onClick={() => navigate("/resources")}
-            className="flex flex-col items-center gap-2 rounded-2xl bg-card p-4 shadow-sm active:scale-[0.97] transition-transform"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
-              <Map className="h-5 w-5 text-accent" />
-            </div>
-            <span className="text-xs font-medium">Resources</span>
-          </button>
+          {[
+            { label: "Update Profile", path: "/profile", icon: User, color: "bg-primary/10 text-primary" },
+            { label: "Resources", path: "/resources", icon: Map, color: "bg-accent/10 text-accent" },
+            { label: "Skills", path: "/skills", icon: User, color: "bg-muted text-muted-foreground" },
+            { label: "Opportunities", path: "/opportunities", icon: Map, color: "bg-primary/10 text-primary" },
+          ].map(({ label, path, icon: Icon, color }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className="flex flex-col items-center gap-2 rounded-2xl bg-card p-4 shadow-sm active:scale-[0.97] transition-transform"
+            >
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <span className="text-xs font-medium">{label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
