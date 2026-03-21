@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Save } from "lucide-react";
+import { LogOut, Save, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
