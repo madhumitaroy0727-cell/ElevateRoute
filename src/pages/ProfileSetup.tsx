@@ -58,9 +58,24 @@ const ProfileSetup = () => {
     setExpOrg("");
   };
 
+  const careerTips = [
+    "💡 Tip: Side projects demonstrate initiative better than coursework alone.",
+    "🎯 Did you know? 85% of jobs are filled through networking.",
+    "📚 Consistency beats intensity — 1 hour daily > 7 hours on weekends.",
+    "🚀 Open source contributions are highly valued by top tech companies.",
+    "🧠 Learning in public (blogs, talks) accelerates career growth.",
+  ];
+  const [currentTip, setCurrentTip] = useState(0);
+
   const handleFinish = async () => {
     if (!user || !goalType) return;
     setLoading(true);
+
+    // Rotate tips during loading
+    const tipInterval = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % careerTips.length);
+    }, 3000);
+
     try {
       // Update profile
       await supabase.from("profiles").update({
@@ -94,11 +109,34 @@ const ProfileSetup = () => {
         preferred_location: preferredLocation,
       });
 
-      toast.success("Profile setup complete!");
+      // Call AI to generate roadmap
+      const { data: session } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-roadmap`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.session?.access_token}`,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        console.error("Roadmap generation failed:", err);
+        toast.error(err.error || "Roadmap generation failed, but your profile is saved.");
+      } else {
+        const result = await res.json();
+        toast.success(`Roadmap generated with ${result.milestone_count} milestones! 🎉`);
+      }
+
       navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
     } finally {
+      clearInterval(tipInterval);
       setLoading(false);
     }
   };
