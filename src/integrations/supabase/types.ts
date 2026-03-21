@@ -195,6 +195,48 @@ export type Database = {
           },
         ]
       }
+      opportunities: {
+        Row: {
+          category: string | null
+          company: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          opportunity_type: string
+          title: string
+          url: string | null
+          work_mode: Database["public"]["Enums"]["work_mode"] | null
+        }
+        Insert: {
+          category?: string | null
+          company: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          opportunity_type?: string
+          title: string
+          url?: string | null
+          work_mode?: Database["public"]["Enums"]["work_mode"] | null
+        }
+        Update: {
+          category?: string | null
+          company?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          opportunity_type?: string
+          title?: string
+          url?: string | null
+          work_mode?: Database["public"]["Enums"]["work_mode"] | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           academic_year: string | null
@@ -314,6 +356,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      saved_opportunities: {
+        Row: {
+          created_at: string
+          id: string
+          opportunity_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_opportunities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       skills: {
         Row: {
