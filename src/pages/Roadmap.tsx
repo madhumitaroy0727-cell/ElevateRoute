@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, Clock, Circle, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { checkAndAwardAchievements } from "@/lib/achievements";
 
 interface Milestone {
   id: string;
