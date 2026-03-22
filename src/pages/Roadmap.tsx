@@ -46,6 +46,7 @@ const Roadmap = () => {
   }, [user]);
 
   const toggleStatus = async (milestone: Milestone) => {
+    if (!user) return;
     const nextStatus = milestone.status === "pending" ? "in_progress"
       : milestone.status === "in_progress" ? "completed" : "pending";
     
@@ -56,8 +57,18 @@ const Roadmap = () => {
     
     if (error) { toast.error("Failed to update"); return; }
     
-    setMilestones(ms => ms.map(m => m.id === milestone.id ? { ...m, status: nextStatus as Milestone["status"] } : m));
-    if (nextStatus === "completed") toast.success("Milestone completed! 🎉");
+    const updated = milestones.map(m => m.id === milestone.id ? { ...m, status: nextStatus as Milestone["status"] } : m);
+    setMilestones(updated);
+
+    if (nextStatus === "completed") {
+      toast.success("Milestone completed! 🎉");
+      // Check for achievements
+      const completedCount = updated.filter(m => m.status === "completed").length;
+      const newAchievements = await checkAndAwardAchievements(user.id, completedCount, updated.length);
+      newAchievements.forEach(a => {
+        setTimeout(() => toast.success(`Achievement unlocked: ${a}`), 500);
+      });
+    }
   };
 
   const phases = [...new Set(milestones.map(m => m.phase))].sort((a, b) => a - b);
