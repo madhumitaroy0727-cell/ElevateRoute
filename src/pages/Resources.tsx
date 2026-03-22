@@ -161,7 +161,7 @@ const Resources = () => {
           <div className="space-y-3 mt-4">
             {filtered.map((r) => {
               const Icon = typeIcons[r.type] || BookOpen;
-              const saved = bookmarks.has(r.id);
+              const saved = currentBookmarks.has(r.id);
 
               return (
                 <Card key={r.id} className="border transition-shadow hover:shadow-md">
