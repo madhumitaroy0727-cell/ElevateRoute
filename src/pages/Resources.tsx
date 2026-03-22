@@ -58,7 +58,7 @@ const Resources = () => {
 
   const toggleBookmark = async (resourceId: string) => {
     if (!user) return;
-    const isBookmarked = bookmarks.has(resourceId);
+    const isBookmarked = currentBookmarks.has(resourceId);
 
     if (isBookmarked) {
       const { error } = await supabase
@@ -70,8 +70,8 @@ const Resources = () => {
         toast.error("Failed to remove bookmark");
         return;
       }
-      setBookmarks((prev) => {
-        const next = new Set(prev);
+      setLocalBookmarks((prev) => {
+        const next = new Set(prev ?? bookmarks);
         next.delete(resourceId);
         return next;
       });
@@ -83,9 +83,10 @@ const Resources = () => {
         toast.error("Failed to bookmark");
         return;
       }
-      setBookmarks((prev) => new Set(prev).add(resourceId));
+      setLocalBookmarks((prev) => new Set(prev ?? bookmarks).add(resourceId));
       toast.success("Bookmarked!");
     }
+    queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
   };
 
   const tabs = ["all", "course", "article", "video", "guide", "project"] as const;
