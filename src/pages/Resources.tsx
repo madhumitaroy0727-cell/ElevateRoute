@@ -1,6 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useResources, useBookmarks } from "@/hooks/use-data";
+import { useQueryClient } from "@tanstack/react-query";
 import BottomNav from "@/components/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,30 +46,19 @@ const typeIcons: Record<string, React.ElementType> = {
 
 const Resources = () => {
   const { user } = useAuth();
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  const queryClient = useQueryClient();
+  const { data: resources = [], isLoading: resLoading } = useResources();
+  const { data: bookmarks = new Set<string>(), isLoading: bkLoading } = useBookmarks();
+  const [localBookmarks, setLocalBookmarks] = useState<Set<string> | null>(null);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
 
-  useEffect(() => {
-    const load = async () => {
-      const [{ data: res }, { data: bk }] = await Promise.all([
-        supabase.from("resources").select("*").order("rating", { ascending: false }),
-        user
-          ? supabase.from("bookmarks").select("resource_id").eq("user_id", user.id)
-          : Promise.resolve({ data: [] }),
-      ]);
-      if (res) setResources(res as Resource[]);
-      if (bk) setBookmarks(new Set(bk.map((b: { resource_id: string }) => b.resource_id)));
-      setLoading(false);
-    };
-    load();
-  }, [user]);
+  const loading = resLoading || bkLoading;
+  const currentBookmarks = localBookmarks ?? bookmarks;
 
   const toggleBookmark = async (resourceId: string) => {
     if (!user) return;
-    const isBookmarked = bookmarks.has(resourceId);
+    const isBookmarked = currentBookmarks.has(resourceId);
 
     if (isBookmarked) {
       const { error } = await supabase
@@ -79,8 +70,8 @@ const Resources = () => {
         toast.error("Failed to remove bookmark");
         return;
       }
-      setBookmarks((prev) => {
-        const next = new Set(prev);
+      setLocalBookmarks((prev) => {
+        const next = new Set(prev ?? bookmarks);
         next.delete(resourceId);
         return next;
       });
@@ -92,9 +83,10 @@ const Resources = () => {
         toast.error("Failed to bookmark");
         return;
       }
-      setBookmarks((prev) => new Set(prev).add(resourceId));
+      setLocalBookmarks((prev) => new Set(prev ?? bookmarks).add(resourceId));
       toast.success("Bookmarked!");
     }
+    queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
   };
 
   const tabs = ["all", "course", "article", "video", "guide", "project"] as const;
@@ -169,7 +161,7 @@ const Resources = () => {
           <div className="space-y-3 mt-4">
             {filtered.map((r) => {
               const Icon = typeIcons[r.type] || BookOpen;
-              const saved = bookmarks.has(r.id);
+              const saved = currentBookmarks.has(r.id);
 
               return (
                 <Card key={r.id} className="border transition-shadow hover:shadow-md">

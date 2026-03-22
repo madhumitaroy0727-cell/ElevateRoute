@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useMilestones, useAchievements } from "@/hooks/use-data";
 import BottomNav from "@/components/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,22 +21,6 @@ import {
   Cell,
 } from "recharts";
 
-interface Milestone {
-  id: string;
-  title: string;
-  status: string;
-  phase: number;
-  estimated_weeks: number | null;
-}
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string | null;
-  badge_icon: string | null;
-  earned_at: string;
-}
-
 const PHASE_COLORS = [
   "hsl(var(--primary))",
   "hsl(var(--accent))",
@@ -45,57 +30,30 @@ const PHASE_COLORS = [
 ];
 
 const Progress = () => {
-  const { user } = useAuth();
-  const [milestones, setMilestones] = useState<Milestone[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: milestones = [], isLoading: msLoading } = useMilestones();
+  const { data: achievements = [], isLoading: achLoading } = useAchievements();
 
-  useEffect(() => {
-    if (!user) return;
-    const load = async () => {
-      const [{ data: ms }, { data: ach }] = await Promise.all([
-        supabase
-          .from("milestones")
-          .select("id, title, status, phase, estimated_weeks")
-          .eq("user_id", user.id)
-          .order("order_index", { ascending: true }),
-        supabase
-          .from("achievements")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("earned_at", { ascending: false }),
-      ]);
-      if (ms) setMilestones(ms as Milestone[]);
-      if (ach) setAchievements(ach as Achievement[]);
-      setLoading(false);
-    };
-    load();
-  }, [user]);
-
+  const loading = msLoading || achLoading;
   const total = milestones.length;
   const completed = milestones.filter((m) => m.status === "completed").length;
   const inProgress = milestones.filter((m) => m.status === "in_progress").length;
   const pending = milestones.filter((m) => m.status === "pending").length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  // Build area chart data — cumulative completion by phase
   const phases = [...new Set(milestones.map((m) => m.phase))].sort((a, b) => a - b);
   const areaData = phases.map((phase) => {
     const inPhase = milestones.filter((m) => m.phase <= phase);
     const done = inPhase.filter((m) => m.status === "completed").length;
-    return {
-      name: `Phase ${phase}`,
-      completed: done,
-      total: inPhase.length,
-    };
+    return { name: `Phase ${phase}`, completed: done, total: inPhase.length };
   });
 
-  // Pie chart data by phase
-  const pieData = phases.map((phase) => ({
-    name: `Phase ${phase}`,
-    value: milestones.filter((m) => m.phase === phase && m.status === "completed").length,
-    total: milestones.filter((m) => m.phase === phase).length,
-  })).filter((d) => d.total > 0);
+  const pieData = phases
+    .map((phase) => ({
+      name: `Phase ${phase}`,
+      value: milestones.filter((m) => m.phase === phase && m.status === "completed").length,
+      total: milestones.filter((m) => m.phase === phase).length,
+    }))
+    .filter((d) => d.total > 0);
 
   const hasData = total > 0;
 
@@ -160,7 +118,7 @@ const Progress = () => {
             </CardContent>
           </Card>
 
-          {/* Area chart — cumulative progress */}
+          {/* Area chart */}
           {areaData.length > 1 && (
             <Card className="border">
               <CardHeader className="pb-2 px-4 pt-4">
@@ -186,30 +144,15 @@ const Progress = () => {
                         fontSize: 12,
                       }}
                     />
-                    <Area
-                      type="monotone"
-                      dataKey="completed"
-                      stroke="hsl(var(--accent))"
-                      strokeWidth={2}
-                      fill="url(#progressGrad)"
-                      name="Completed"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="total"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      strokeDasharray="4 4"
-                      fill="none"
-                      name="Total"
-                    />
+                    <Area type="monotone" dataKey="completed" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#progressGrad)" name="Completed" />
+                    <Area type="monotone" dataKey="total" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="4 4" fill="none" name="Total" />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           )}
 
-          {/* Pie chart — by phase */}
+          {/* Pie chart */}
           {pieData.length > 0 && (
             <Card className="border">
               <CardHeader className="pb-2 px-4 pt-4">
