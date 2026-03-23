@@ -14,6 +14,7 @@ const tabs = [
 const menuItems = [
   { icon: Zap, label: "Skills Assessment", path: "/skills" },
   { icon: Briefcase, label: "Job Opportunities", path: "/opportunities" },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 const BottomNav = () => {
