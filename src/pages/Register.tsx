@@ -41,8 +41,8 @@ const Register = () => {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
           <Map className="h-7 w-7 text-primary-foreground" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Start building your career roadmap</p>
+        <h1 className="text-2xl font-bold tracking-tight">Join <span className="text-primary">ElevateRoute</span></h1>
+        <p className="mt-1 text-sm text-muted-foreground">Create your account and start building your career roadmap</p>
       </div>
 
       <Card className="w-full max-w-sm border-0 shadow-lg shadow-primary/5">
