@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Map, BarChart3, BookOpen, User, Menu, X, Zap, Briefcase } from "lucide-react";
+import { Home, Map, BarChart3, BookOpen, User, Menu, X, Zap, Briefcase, Settings } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
